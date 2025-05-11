@@ -1,1 +1,74 @@
 
+---
+- name: Deploy Web Application with Docker and Nginx Load Balancer
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install required system packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - gnupg-agent
+
+    - name: Add Docker’s official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker CE
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker is running and enabled
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Docker image from private registry
+      docker_image:
+        name: your-private-registry/your-image
+        source: pull
+        tag: latest
+
+    - name: Run Docker containers
+      docker_container:
+        name: "webapp-{{ item }}"
+        image: your-private-registry/your-image
+        state: started
+        ports:
+          - "800{{ item }}:8000"
+        env:
+          AUTHOR1: "Your Author"
+      loop: [0, 1, 2]
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Configure Nginx load balancer
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify: Restart Nginx
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
