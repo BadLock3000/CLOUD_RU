@@ -1,6 +1,6 @@
 
----
-- name: Deploy Web Application with Docker and Nginx Load Balancer
+
+- name: Deploy task1
   hosts: all
   become: yes
   tasks:
@@ -40,14 +40,14 @@
 
     - name: Pull Docker image from private registry
       docker_image:
-        name: your-private-registry/your-image
+        name: aaaaaarteeeem/cloudtask1
         source: pull
         tag: latest
 
     - name: Run Docker containers
       docker_container:
         name: "webapp-{{ item }}"
-        image: your-private-registry/your-image
+        image: aaaaaarteeeem/cloudtask1
         state: started
         ports:
           - "800{{ item }}:8000"
