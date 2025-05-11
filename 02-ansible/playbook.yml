@@ -1,6 +1,5 @@
-
-
-- name: Deploy task1
+---
+- name: deploy task1 
   hosts: all
   become: yes
   tasks:
@@ -37,6 +36,12 @@
         name: docker
         state: started
         enabled: yes
+
+    - name: Log in to Docker Hub
+      docker_login:
+        username: aaaaaarteeeem
+        password: "{{ docker_hub_password }}"
+        email: ***********
 
     - name: Pull Docker image from private registry
       docker_image:
